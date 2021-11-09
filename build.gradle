@@ -1,0 +1,41 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.6'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'us.jcedeno'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// Jsoup
+	implementation 'org.jsoup:jsoup:1.14.3'
+	// Gson
+	implementation 'com.google.code.gson:gson:2.8.9'
+	// Guava
+	implementation("com.google.guava:guava:31.0.1-jre")
+	// IPFS
+	implementation 'com.github.ipfs:java-ipfs-http-client:v1.3.3'
+
+}
+
+test {
+	useJUnitPlatform()
+}
