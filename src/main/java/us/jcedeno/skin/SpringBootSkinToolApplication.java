@@ -75,6 +75,7 @@ public class SpringBootSkinToolApplication {
 				.header("accept", "application/json").build();
 
 		try {
+			// TODO Don't just return, use the data to upload skins to mojang.
 			return client.send(request, BodyHandlers.ofString()).body();
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
