@@ -29,6 +29,13 @@ import io.ipfs.multihash.Multihash;
 import lombok.Getter;
 import us.jcedeno.skin.uploader.UploaderTask;
 
+/**
+ * SkinToolApplication is a spring tool rest api that interacts with
+ * skin-tool-python to generate custom skins on demand. This app also guarantees
+ * that the skins get uploaded to the mojang servers.
+ * 
+ * @author jcedeno
+ */
 @RestController
 @SpringBootApplication
 public class SkinToolApplication {
