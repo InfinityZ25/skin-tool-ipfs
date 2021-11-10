@@ -54,6 +54,12 @@ public class SkinToolApplication {
 		final var ipfsAddress = getEnvOrEmpty("IPFS_HOST");
 		final var skinToolPythonUri = getEnvOrEmpty("SKIN_TOOL_PYTHON_URI");
 
+		// Print out all variables
+		System.out.println("MINESKIN_KEY: " + mineskinClientKey);
+		System.out.println("MINESKIN_USR_AGENT: " + mineskinAgent);
+		System.out.println("IPFS_HOST: " + ipfsAddress);
+		System.out.println("SKIN_TOOL_PYTHON_URI: " + skinToolPythonUri);
+
 		// Set the SkinTool Python endpoint
 		skinToolPythonEndpoint = skinToolPythonUri.isEmpty() ? "http://localhost:8069" : skinToolPythonUri;
 
@@ -114,7 +120,7 @@ public class SkinToolApplication {
 	 * @return The value of the environment variable or blank.
 	 */
 	private static String getEnvOrEmpty(String key) {
-		return System.getenv("MINESKIN_CLIENT_URL") != null ? System.getenv("MINESKIN_CLIENT_URL") : "";
+		return System.getenv(key) != null ? System.getenv(key) : "";
 	}
 
 	/**
