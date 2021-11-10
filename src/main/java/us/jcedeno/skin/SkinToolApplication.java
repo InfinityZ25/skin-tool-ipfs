@@ -9,17 +9,17 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.UUID;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
 import org.mineskin.MineskinClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.ipfs.api.IPFS;
@@ -27,16 +27,18 @@ import io.ipfs.api.NamedStreamable;
 import io.ipfs.multiaddr.MultiAddress;
 import io.ipfs.multihash.Multihash;
 import lombok.Getter;
+import us.jcedeno.skin.uploader.UploaderTask;
 
 @RestController
 @SpringBootApplication
-public class SpringBootSkinToolApplication {
+public class SkinToolApplication {
 	private static @Getter MineskinClient mineskinClient;
 	private static @Getter IPFS ipfs;
 
 	private static @Getter String skinToolPythonEndpoint;
-
+	private static @Getter Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	private static HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
+	private static @Getter UploaderTask uploaderThread;
 
 	public static void main(String[] args) {
 		// Get variables from environment
@@ -56,18 +58,20 @@ public class SpringBootSkinToolApplication {
 				: new MineskinClient(mineskinAgent.isEmpty() ? "SkinToolApi" : mineskinAgent);
 
 		// Run Spring Boot
-		SpringApplication.run(SpringBootSkinToolApplication.class, args);
+		SpringApplication.run(SkinToolApplication.class, args);
+
+		// Create and start Uploader Task Thread.
+		uploaderThread = new UploaderTask();
+		uploaderThread.start();
 
 	}
 
-	@GetMapping("/helloworld")
+	@GetMapping("/hello")
 	public String helloWorld() {
 		return "Hello World (" + System.currentTimeMillis() + ")!";
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/generate/{id}", method = RequestMethod.GET)
-	public String generateSkins(@PathVariable("id") String id) {
+	public static JsonObject generateSkins(String id) {
 
 		// Make a get request
 
@@ -75,13 +79,12 @@ public class SpringBootSkinToolApplication {
 				.header("accept", "application/json").build();
 
 		try {
-			// TODO Don't just return, use the data to upload skins to mojang.
-			return client.send(request, BodyHandlers.ofString()).body();
+			return gson.fromJson(client.send(request, BodyHandlers.ofString()).body(), JsonObject.class);
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 
-		return "";
+		return new JsonObject();
 	}
 
 	@GetMapping("/get")
