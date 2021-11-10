@@ -66,11 +66,13 @@ public class SkinToolApplication {
 
 	}
 
-	@GetMapping("/hello")
-	public String helloWorld() {
-		return "Hello World (" + System.currentTimeMillis() + ")!";
-	}
-
+	/**
+	 * Util function to generate the player skin variants by contacting
+	 * skin-tool-python.
+	 * 
+	 * @param id The UUID of the player you wish to generate the skins for.
+	 * @return A JSON object containing the player skin variants.
+	 */
 	public static JsonObject generateSkins(String id) {
 
 		// Make a get request
@@ -86,6 +88,33 @@ public class SkinToolApplication {
 
 		return new JsonObject();
 	}
+
+	/**
+	 * Just returns hello world if api is online.
+	 * 
+	 * @return Hello world.
+	 */
+	@GetMapping("/hello")
+	public String helloWorld() {
+		return "Hello World (" + System.currentTimeMillis() + ")!";
+	}
+
+	/**
+	 * 
+	 * Function that returns the string of an environment variable or blank.
+	 * 
+	 * @param key The key of the environment variable.
+	 * @return The value of the environment variable or blank.
+	 */
+	private static String getEnvOrEmpty(String key) {
+		return System.getenv("MINESKIN_CLIENT_URL") != null ? System.getenv("MINESKIN_CLIENT_URL") : "";
+	}
+
+	/**
+	 * 
+	 * From here on, you'll see functions protoypes of how to use ipfs.
+	 * 
+	 */
 
 	@GetMapping("/get")
 	public String getMultihash(@RequestParam(value = "hash") String multihash) {
@@ -131,17 +160,6 @@ public class SkinToolApplication {
 			e.printStackTrace();
 		}
 		return "null";
-	}
-
-	/**
-	 * 
-	 * Function that returns the string of an environment variable or blank.
-	 * 
-	 * @param key The key of the environment variable.
-	 * @return The value of the environment variable or blank.
-	 */
-	private static String getEnvOrEmpty(String key) {
-		return System.getenv("MINESKIN_CLIENT_URL") != null ? System.getenv("MINESKIN_CLIENT_URL") : "";
 	}
 
 }

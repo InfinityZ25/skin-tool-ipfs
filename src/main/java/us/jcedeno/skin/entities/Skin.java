@@ -8,7 +8,6 @@ import lombok.Setter;
  * 
  * @jcedeno
  */
-
 public class Skin {
     /** The name to refer to this skin-variant as. */
     private final @Getter String name;

@@ -25,7 +25,7 @@ import us.jcedeno.skin.entities.SkinCollection;
  */
 @RestController
 public class SkinController {
-
+    // TODO: Extend a Concurrent HashMap and implement it using ipfs
     private static volatile @Getter Map<SkinCollection, UUID> skinCollectionMap = new HashMap<>();
 
     /**
@@ -76,6 +76,14 @@ public class SkinController {
 
     }
 
+    /**
+     * Helper function to quickly compare to uuids.
+     * 
+     * @param uuid1 First id.
+     * @param uuid2 Second id.
+     * 
+     * @return true if ids are equal.
+     */
     private static Boolean isEquals(UUID uuid1, UUID uuid2) {
         return uuid1.compareTo(uuid2) == 0;
     }
