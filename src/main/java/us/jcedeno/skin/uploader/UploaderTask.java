@@ -35,6 +35,7 @@ public class UploaderTask extends Thread {
                         if (attempt != null) {
                             // Update the skin with the new signature
                             skins.setSignature(attempt.data.texture.signature);
+			    skins.setValue(attempt.data.texture.value);
                             // Log success
                             System.out.println(
                                     "Successfully uploaded skin: " + skins.getName() + " for " + entry.getValue());

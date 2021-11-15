@@ -38,9 +38,12 @@ public class SkinController {
     public Optional<List<SkinCollection>> getSkins(@PathVariable("id") String id,
             @RequestParam(value = "otherwiseCreate", defaultValue = "false") Boolean createIfNotPresent) {
         // Process the rest in a lambda
+	
         var list = skinCollectionMap.entrySet().stream()
-                .filter(entry -> isEquals(entry.getValue(), UUID.fromString(id))).map(mapper -> mapper.getKey())
-                .sorted().toList();
+                .filter(entry -> isEquals(entry.getValue(), UUID.fromString(id)))
+		.map(mapper -> mapper.getKey())
+                .sorted()
+		.toList();
 
         if (list.isEmpty()) {
             if (createIfNotPresent) {

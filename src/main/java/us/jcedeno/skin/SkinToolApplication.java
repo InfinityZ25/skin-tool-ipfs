@@ -64,7 +64,7 @@ public class SkinToolApplication {
 		skinToolPythonEndpoint = skinToolPythonUri.isEmpty() ? "http://localhost:8069" : skinToolPythonUri;
 
 		// Intialize IFPS client
-		ipfs = new IPFS(new MultiAddress(ipfsAddress.isEmpty() ? "/ip4/127.0.0.1/tcp/5001" : ipfsAddress));
+		// ipfs = new IPFS(new MultiAddress(ipfsAddress.isEmpty() ? "/ip4/127.0.0.1/tcp/5001" : ipfsAddress));
 
 		// Intialize mineskinClient
 		mineskinClient = mineskinClientKey.isEmpty() ? new MineskinClient(mineskinAgent, mineskinClientKey)

@@ -17,7 +17,7 @@ public class Skin {
      */
     private volatile @Getter @Setter String signature;
     /** The base64-encoded skin file. This is the actual png skin image */
-    private final @Getter String value;
+    private volatile @Getter @Setter String value;
 
     public Skin(String value, String name) {
         this.value = value;
