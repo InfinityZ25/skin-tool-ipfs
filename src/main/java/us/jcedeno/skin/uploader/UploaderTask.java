@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.UUID;
 
+import org.mineskin.SkinOptions;
+import org.mineskin.Variant;
+import org.mineskin.Visibility;
 import org.mineskin.data.Skin;
 
 import us.jcedeno.skin.SkinToolApplication;
@@ -26,16 +29,16 @@ public class UploaderTask extends Thread {
             SkinController.getSkinCollectionMap().entrySet().forEach(entry -> {
                 entry.getKey().getSkins().stream().filter(s -> s.getSignature() == null).forEach(skins -> {
                     try {
-                        var attempt = attemptUpload(skins.getValue());
+                        var attempt = attemptUpload(skins.getValue(), skins.isSlim());
                         // Loop until the skin is uploaded
                         while (attempt == null) {
                             // Try Again
-                            attempt = attemptUpload(skins.getValue());
+                            attempt = attemptUpload(skins.getValue(), skins.isSlim());
                         }
                         if (attempt != null) {
                             // Update the skin with the new signature
                             skins.setSignature(attempt.data.texture.signature);
-			    skins.setValue(attempt.data.texture.value);
+                            skins.setValue(attempt.data.texture.value);
                             // Log success
                             System.out.println(
                                     "Successfully uploaded skin: " + skins.getName() + " for " + entry.getValue());
@@ -67,7 +70,7 @@ public class UploaderTask extends Thread {
      * @throws IOException When the skin can't be written as a file in the local
      *                     disk for permissions reasons.
      */
-    static Skin attemptUpload(String skinBase64) throws IOException {
+    static Skin attemptUpload(String skinBase64, boolean bool) throws IOException {
         // Translate the skinBase64 to a file
         var skin = Base64.getDecoder().decode(skinBase64);
         var skinFile = new File("skin_" + UUID.randomUUID().toString().split("-")[0] + ".png");
@@ -78,7 +81,8 @@ public class UploaderTask extends Thread {
         Skin skinObject = null;
 
         try {
-            skinObject = SkinToolApplication.getMineskinClient().generateUpload(skinFile).get();
+            skinObject = SkinToolApplication.getMineskinClient().generateUpload(skinFile,
+                    SkinOptions.create("", bool ? Variant.SLIM : Variant.CLASSIC, Visibility.PUBLIC)).get();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -33,7 +33,7 @@ public class SkinCollection {
      * @return The newly generated collection.
      */
     public static SkinCollection random() {
-        return of(List.of(Skin.create("skinBase64", UUID.randomUUID().toString().split("-")[0])));
+        return of(List.of(Skin.create("skinBase64", UUID.randomUUID().toString().split("-")[0], false)));
     }
 
 }

@@ -38,12 +38,10 @@ public class SkinController {
     public Optional<List<SkinCollection>> getSkins(@PathVariable("id") String id,
             @RequestParam(value = "otherwiseCreate", defaultValue = "false") Boolean createIfNotPresent) {
         // Process the rest in a lambda
-	
+
         var list = skinCollectionMap.entrySet().stream()
-                .filter(entry -> isEquals(entry.getValue(), UUID.fromString(id)))
-		.map(mapper -> mapper.getKey())
-                .sorted()
-		.toList();
+                .filter(entry -> isEquals(entry.getValue(), UUID.fromString(id))).map(mapper -> mapper.getKey())
+                .sorted().toList();
 
         if (list.isEmpty()) {
             if (createIfNotPresent) {
@@ -67,8 +65,9 @@ public class SkinController {
         var skinsForPlayer = SkinToolApplication.generateSkins(id.toString());
 
         // Parse the skins into SkinCollection Format.
-        var skins = skinsForPlayer.getAsJsonObject("data").entrySet().stream()
-                .map(m -> Skin.create(m.getValue().getAsString(), m.getKey())).toList();
+        var skins = skinsForPlayer.getAsJsonObject("data").entrySet().stream().map(
+                m -> Skin.create(m.getValue().getAsString(), m.getKey(), skinsForPlayer.get("slim").getAsBoolean()))
+                .toList();
 
         var collection = SkinCollection.of(skins);
 
