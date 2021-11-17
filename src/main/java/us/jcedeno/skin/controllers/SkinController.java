@@ -1,10 +1,9 @@
 package us.jcedeno.skin.controllers;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +25,7 @@ import us.jcedeno.skin.entities.SkinCollection;
 @RestController
 public class SkinController {
     // TODO: Extend a Concurrent HashMap and implement it using ipfs
-    private static volatile @Getter Map<SkinCollection, UUID> skinCollectionMap = new HashMap<>();
+    private static volatile @Getter ConcurrentHashMap<SkinCollection, UUID> skinCollectionMap = new ConcurrentHashMap<>();
 
     /**
      * Retrieves the skins that belong to the given id.
@@ -60,6 +59,11 @@ public class SkinController {
 
     @PutMapping("/skin/create/{id}")
     public SkinCollection generateSkins(@PathVariable("id") UUID id) {
+
+       var opt = skinCollectionMap.entrySet().stream().filter(entry -> isEquals(entry.getValue(), id)).findFirst();
+       if(opt.isPresent()){
+           return opt.get().getKey();
+        }
 
         // Get the skins from python
         var skinsForPlayer = SkinToolApplication.generateSkins(id.toString());

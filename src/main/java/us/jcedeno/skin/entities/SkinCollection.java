@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor(staticName = "of")
 public class SkinCollection {
-    private @Getter @NonNull List<Skin> skins;
+    private volatile @Getter @NonNull List<Skin> skins;
 
     /**
      * Overrides the current contents of the skin collection. It's just a setter.
