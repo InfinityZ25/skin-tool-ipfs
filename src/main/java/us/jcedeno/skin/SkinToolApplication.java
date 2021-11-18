@@ -6,6 +6,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.util.List;
+import java.util.UUID;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,6 +19,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.Getter;
+import us.jcedeno.skin.controllers.SkinController;
+import us.jcedeno.skin.entities.Skin;
 import us.jcedeno.skin.redis.RedisController;
 import us.jcedeno.skin.uploader.UploaderTask;
 
@@ -64,9 +68,15 @@ public class SkinToolApplication {
 		SpringApplication.run(SkinToolApplication.class, args);
 
 		// Initialize cache controller
-		if (redisURI != null && !redisURI.isEmpty())
-			cacheController = new RedisController(redisURI);
+		if (redisURI != null && !redisURI.isEmpty()) {
 
+			cacheController = new RedisController(redisURI);
+			cacheController.getRedisConnection().sync().hgetall("skins").entrySet().forEach(all -> {
+				var id = UUID.fromString(all.getKey());
+				var skins = List.of(gson.fromJson(all.getValue(), Skin[].class));
+				SkinController.getSkinCollectionMap().put(id, skins);
+			});
+		}
 		cacheController = new RedisController(redisURI);
 
 		// Create and start Uploader Task Thread

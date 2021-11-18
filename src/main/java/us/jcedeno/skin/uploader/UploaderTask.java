@@ -35,7 +35,7 @@ public class UploaderTask extends Thread {
 
             // Send the thread to sleep every 500ms.
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -50,8 +50,8 @@ public class UploaderTask extends Thread {
      * 
      */
     private static void processSkins() {
-        SkinController.getSkinCollectionMap().entrySet().parallelStream().forEach(entry -> {
-            entry.getKey().getSkins().parallelStream().filter(s -> s.getSignature() == null).forEach(skins -> {
+        SkinController.getSkinCollectionMap().entrySet().parallelStream().forEach(e -> {
+            e.getValue().stream().filter(ep -> ep.getSignature() == null).forEach(skins -> {
                 try {
                     var attempt = attemptUpload(skins.getValue(), skins.isSlim());
                     // Loop until the skin is uploaded
@@ -63,22 +63,19 @@ public class UploaderTask extends Thread {
                         // Update the skin with the new signature
                         skins.setSignature(attempt.data.texture.signature);
                         skins.setValue(attempt.data.texture.value);
-                        // TODO update the skin in the database.
 
                         // Notify of changes later.
                         if (!anyChanges.get())
                             anyChanges.set(true);
 
                         // Log success
-                        System.out
-                                .println("Successfully uploaded skin: " + skins.getName() + " for " + entry.getValue());
+                        System.out.println("Successfully uploaded skin: " + skins.getName() + " for " + e.getKey());
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
 
             });
-
         });
         if (anyChanges.get()) {
             System.out.println("There are changes on the skins. Writing to database.");
@@ -86,10 +83,11 @@ public class UploaderTask extends Thread {
             var map = new HashMap<String, String>();
             var entries = SkinController.getSkinCollectionMap().entrySet();
             entries.forEach(a -> {
-                map.put(gson.toJson(a.getKey()), a.getValue().toString());
+                map.put(a.getKey().toString(), gson.toJson(a.getValue()));
             });
 
-            SkinToolApplication.getCacheController().getRedisConnection().async().hmset("SKINS", map);
+            SkinToolApplication.getCacheController().getRedisConnection().async().hmset("skins", map);
+
             anyChanges.set(false);
 
         }

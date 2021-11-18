@@ -11,13 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.Getter;
 import us.jcedeno.skin.SkinToolApplication;
 import us.jcedeno.skin.entities.Skin;
-import us.jcedeno.skin.entities.SkinCollection;
 
 /**
  * The rest skin controller. Allows interaction with users skin collections and
@@ -27,36 +25,17 @@ import us.jcedeno.skin.entities.SkinCollection;
  */
 @RestController
 public class SkinController {
-    private static volatile @Getter ConcurrentHashMap<SkinCollection, UUID> skinCollectionMap = new ConcurrentHashMap<>();
+    private static volatile @Getter ConcurrentHashMap<UUID, List<Skin>> skinCollectionMap = new ConcurrentHashMap<>();
 
-    /**
-     * Retrieves the skins that belong to the given id.
-     * 
-     * @param id A unique id that represents the owner of a collection.
-     * @return A collection of skins if present.
-     */
     @GetMapping("/skin/get/{id}")
-    public Optional<List<SkinCollection>> getSkins(@PathVariable("id") String id,
-            @RequestParam(value = "otherwiseCreate", defaultValue = "false") Boolean createIfNotPresent) {
-        // Process the rest in a lambda
+    public Optional<List<Skin>> getSkins(@PathVariable("id") UUID id) {
 
-        var list = skinCollectionMap.entrySet().stream()
-                .filter(entry -> isEquals(entry.getValue(), UUID.fromString(id))).map(mapper -> mapper.getKey())
-                .sorted().toList();
-
-        if (list.isEmpty()) {
-            if (createIfNotPresent) {
-                var collection = SkinCollection.random();
-                skinCollectionMap.put(collection, UUID.fromString(id));
-                // Return optional
-
-                return Optional.of(List.of(collection));
-            }
+        var skinList = skinCollectionMap.get(id);
+        if (skinList == null) {
             return Optional.empty();
         }
 
-        // Return if present.
-        return Optional.of(list);
+        return Optional.ofNullable(skinList);
     }
 
     @GetMapping("/skin/get-all/{variant}")
@@ -65,20 +44,20 @@ public class SkinController {
         var list = new ArrayList<Skin>();
 
         for (var entry : skinCollectionMap.entrySet())
-            for (var skin : entry.getKey().getSkins())
+            for (var skin : entry.getValue())
                 if (skin.getName().equalsIgnoreCase(variant))
                     list.add(skin);
 
-        return Optional.ofNullable(list);
+        return list.isEmpty() ? Optional.empty() : Optional.ofNullable(list);
 
     }
 
     @PutMapping("/skin/create/{id}")
-    public SkinCollection generateSkins(@PathVariable("id") UUID id) {
+    public List<Skin> generateSkins(@PathVariable("id") UUID id) {
+        var storedSkins = skinCollectionMap.get(id);
 
-        var opt = skinCollectionMap.entrySet().stream().filter(entry -> isEquals(entry.getValue(), id)).findFirst();
-        if (opt.isPresent()) {
-            return opt.get().getKey();
+        if (storedSkins != null) {
+            return storedSkins;
         }
 
         // Get the skins from python
@@ -90,12 +69,10 @@ public class SkinController {
                     m -> Skin.create(m.getValue().getAsString(), m.getKey(), skinsForPlayer.get("slim").getAsBoolean()))
                     .toList();
 
-            var collection = SkinCollection.of(skins);
-
             // Add to the map
-            skinCollectionMap.put(collection, id);
+            skinCollectionMap.put(id, skins);
 
-            return collection;
+            return skins;
         } else {
             return null;
         }
