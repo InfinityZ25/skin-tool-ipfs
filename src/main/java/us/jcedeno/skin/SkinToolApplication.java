@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.ipfs.api.IPFS;
 import io.ipfs.api.NamedStreamable;
-import io.ipfs.multiaddr.MultiAddress;
 import io.ipfs.multihash.Multihash;
 import lombok.Getter;
 import us.jcedeno.skin.uploader.UploaderTask;
@@ -64,7 +63,8 @@ public class SkinToolApplication {
 		skinToolPythonEndpoint = skinToolPythonUri.isEmpty() ? "http://localhost:8069" : skinToolPythonUri;
 
 		// Intialize IFPS client
-		// ipfs = new IPFS(new MultiAddress(ipfsAddress.isEmpty() ? "/ip4/127.0.0.1/tcp/5001" : ipfsAddress));
+		// ipfs = new IPFS(new MultiAddress(ipfsAddress.isEmpty() ?
+		// "/ip4/127.0.0.1/tcp/5001" : ipfsAddress));
 
 		// Intialize mineskinClient
 		mineskinClient = mineskinClientKey.isEmpty() ? new MineskinClient(mineskinAgent, mineskinClientKey)
@@ -73,7 +73,7 @@ public class SkinToolApplication {
 		// Run Spring Boot
 		SpringApplication.run(SkinToolApplication.class, args);
 
-		// Create and start Uploader Task Thread.
+		// Create and start Uploader Task Thread
 		uploaderThread = new UploaderTask();
 		uploaderThread.start();
 
@@ -94,9 +94,10 @@ public class SkinToolApplication {
 				.header("accept", "application/json").build();
 
 		try {
-			return gson.fromJson(client.send(request, BodyHandlers.ofString()).body(), JsonObject.class);
+			var response = client.send(request, BodyHandlers.ofString()).body();
+			return gson.fromJson(response, JsonObject.class);
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		return new JsonObject();

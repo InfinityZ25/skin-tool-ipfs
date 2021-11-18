@@ -1,9 +1,11 @@
 package us.jcedeno.skin.controllers;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +61,28 @@ public class SkinController {
         return Optional.of(list);
     }
 
+    @GetMapping("/skin/get-random/{variant}")
+    public Optional<List<Skin>> getAllVariants(@PathVariable("variant") String variant) {
+        // Process the rest in a lambda
+        System.out.println("variant" + variant);
+
+        var matches = skinCollectionMap.entrySet().stream().map(p -> {
+            var iter = p.getKey().getSkins().iterator();
+
+            while (iter.hasNext()) {
+                var skin = iter.next();
+                if (skin.getName().equalsIgnoreCase("variant"))
+                    return skin;
+            }
+
+            return null;
+
+        }).filter(Predicate.not(Objects::nonNull)).toList();
+
+        return Optional.ofNullable(matches);
+
+    }
+
     @PutMapping("/skin/create/{id}")
     public SkinCollection generateSkins(@PathVariable("id") UUID id) {
 
@@ -71,31 +95,45 @@ public class SkinController {
         var skinsForPlayer = SkinToolApplication.generateSkins(id.toString());
 
         // Parse the skins into SkinCollection Format.
-        var skins = skinsForPlayer.getAsJsonObject("data").entrySet().stream().map(
-                m -> Skin.create(m.getValue().getAsString(), m.getKey(), skinsForPlayer.get("slim").getAsBoolean()))
-                .toList();
+        if (skinsForPlayer.get("data") != null) {
+            var skins = skinsForPlayer.getAsJsonObject("data").entrySet().stream().map(
+                    m -> Skin.create(m.getValue().getAsString(), m.getKey(), skinsForPlayer.get("slim").getAsBoolean()))
+                    .toList();
 
-        var collection = SkinCollection.of(skins);
+            var collection = SkinCollection.of(skins);
 
-        // Add to the map
-        skinCollectionMap.put(collection, id);
+            // Add to the map
+            skinCollectionMap.put(collection, id);
 
-        return collection;
+            return collection;
+        } else {
+            return null;
+        }
 
     }
 
     @PostMapping("/skin/add")
     public boolean addSkin(@RequestBody List<UUID> requestJson) {
-        System.out.println(requestJson);
-        requestJson.forEach(System.out::println);
+
+        if (requestJson.isEmpty()) {
+            return false;
+        }
+        // Generate skins for all the provided ids
+        requestJson.parallelStream().forEach(id -> {
+            try {
+                generateSkins(id);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         // Return to symbolize failure`
-        return false;
+        return true;
     }
 
     /**
      * Helper function to quickly compare to uuids.
      * 
-     * @param uuid1 First id.
+     * @param uuid1 First id.`
      * @param uuid2 Second id.
      * 
      * @return true if ids are equal.

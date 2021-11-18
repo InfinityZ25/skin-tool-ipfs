@@ -26,7 +26,7 @@ public class UploaderTask extends Thread {
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            SkinController.getSkinCollectionMap().entrySet().forEach(entry -> {
+            SkinController.getSkinCollectionMap().entrySet().parallelStream().forEach(entry -> {
                 entry.getKey().getSkins().stream().filter(s -> s.getSignature() == null).forEach(skins -> {
                     try {
                         var attempt = attemptUpload(skins.getValue(), skins.isSlim());
