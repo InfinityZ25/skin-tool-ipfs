@@ -17,16 +17,19 @@ public class Skin {
      */
     private volatile @Getter @Setter String signature;
     /** The base64-encoded skin file. This is the actual png skin image */
-    private final @Getter String value;
+    private volatile @Getter @Setter String value;
+    /** Weather the skin is slim or not */
+    private volatile @Getter @Setter boolean slim;
 
-    public Skin(String value, String name) {
+    public Skin(String value, String name, Boolean slim) {
         this.value = value;
         this.name = name;
+        this.slim = slim;
     }
 
     /** Static constructor */
-    public static Skin create(String skinBase64, String skinName) {
-        return new Skin(skinBase64, skinName);
+    public static Skin create(String skinBase64, String skinName, Boolean slim) {
+        return new Skin(skinBase64, skinName, slim);
     }
 
 }

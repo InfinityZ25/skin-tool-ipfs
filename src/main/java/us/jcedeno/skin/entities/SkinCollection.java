@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor(staticName = "of")
 public class SkinCollection {
-    private @Getter @NonNull List<Skin> skins;
+    private volatile @Getter @NonNull List<Skin> skins;
 
     /**
      * Overrides the current contents of the skin collection. It's just a setter.
@@ -33,7 +33,7 @@ public class SkinCollection {
      * @return The newly generated collection.
      */
     public static SkinCollection random() {
-        return of(List.of(Skin.create("skinBase64", UUID.randomUUID().toString().split("-")[0])));
+        return of(List.of(Skin.create("skinBase64", UUID.randomUUID().toString().split("-")[0], false)));
     }
 
 }
