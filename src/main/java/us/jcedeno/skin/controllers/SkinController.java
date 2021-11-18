@@ -1,11 +1,10 @@
 package us.jcedeno.skin.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,25 +60,19 @@ public class SkinController {
         return Optional.of(list);
     }
 
-    @GetMapping("/skin/get-random/{variant}")
+    @GetMapping("/skin/get-all/{variant}")
     public Optional<List<Skin>> getAllVariants(@PathVariable("variant") String variant) {
         // Process the rest in a lambda
         System.out.println("variant" + variant);
 
-        var matches = skinCollectionMap.entrySet().stream().map(p -> {
-            var iter = p.getKey().getSkins().iterator();
+        var list = new ArrayList<Skin>();
 
-            while (iter.hasNext()) {
-                var skin = iter.next();
-                if (skin.getName().equalsIgnoreCase("variant"))
-                    return skin;
-            }
+        for (var entry : skinCollectionMap.entrySet())
+            for (var skin : entry.getKey().getSkins())
+                if (skin.getName().equalsIgnoreCase(variant))
+                    list.add(skin);
 
-            return null;
-
-        }).filter(Predicate.not(Objects::nonNull)).toList();
-
-        return Optional.ofNullable(matches);
+        return Optional.ofNullable(list);
 
     }
 
