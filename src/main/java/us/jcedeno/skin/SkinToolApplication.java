@@ -26,6 +26,7 @@ import io.ipfs.api.IPFS;
 import io.ipfs.api.NamedStreamable;
 import io.ipfs.multihash.Multihash;
 import lombok.Getter;
+import us.jcedeno.skin.redis.RedisController;
 import us.jcedeno.skin.uploader.UploaderTask;
 
 /**
@@ -45,6 +46,7 @@ public class SkinToolApplication {
 	private static @Getter Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	private static HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
 	private static @Getter UploaderTask uploaderThread;
+	private static @Getter RedisController cacheController;
 
 	public static void main(String[] args) {
 		// Get variables from environment
@@ -52,12 +54,14 @@ public class SkinToolApplication {
 		final var mineskinAgent = getEnvOrEmpty("MINESKIN_USR_AGENT");
 		final var ipfsAddress = getEnvOrEmpty("IPFS_HOST");
 		final var skinToolPythonUri = getEnvOrEmpty("SKIN_TOOL_PYTHON_URI");
+		final var redisURI = getEnvOrEmpty("REDIS_URI");
 
 		// Print out all variables
 		System.out.println("MINESKIN_KEY: " + mineskinClientKey);
 		System.out.println("MINESKIN_USR_AGENT: " + mineskinAgent);
 		System.out.println("IPFS_HOST: " + ipfsAddress);
 		System.out.println("SKIN_TOOL_PYTHON_URI: " + skinToolPythonUri);
+		System.out.println("REDIS_URI: " + redisURI);
 
 		// Set the SkinTool Python endpoint
 		skinToolPythonEndpoint = skinToolPythonUri.isEmpty() ? "http://localhost:8069" : skinToolPythonUri;
@@ -72,6 +76,12 @@ public class SkinToolApplication {
 
 		// Run Spring Boot
 		SpringApplication.run(SkinToolApplication.class, args);
+
+		// Initialize cache controller
+		if (redisURI != null && !redisURI.isEmpty())
+			cacheController = new RedisController(redisURI);
+
+		cacheController = new RedisController(redisURI);
 
 		// Create and start Uploader Task Thread
 		uploaderThread = new UploaderTask();

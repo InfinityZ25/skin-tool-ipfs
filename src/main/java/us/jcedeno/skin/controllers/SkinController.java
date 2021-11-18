@@ -27,7 +27,6 @@ import us.jcedeno.skin.entities.SkinCollection;
  */
 @RestController
 public class SkinController {
-    // TODO: Extend a Concurrent HashMap and implement it using ipfs
     private static volatile @Getter ConcurrentHashMap<SkinCollection, UUID> skinCollectionMap = new ConcurrentHashMap<>();
 
     /**
@@ -62,8 +61,6 @@ public class SkinController {
 
     @GetMapping("/skin/get-all/{variant}")
     public Optional<List<Skin>> getAllVariants(@PathVariable("variant") String variant) {
-        // Process the rest in a lambda
-        System.out.println("variant" + variant);
 
         var list = new ArrayList<Skin>();
 

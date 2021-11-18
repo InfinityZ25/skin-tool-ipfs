@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.gson.Gson;
 
 import org.mineskin.SkinOptions;
 import org.mineskin.Variant;
@@ -22,34 +26,12 @@ import us.jcedeno.skin.controllers.SkinController;
  * @author jcedeno
  */
 public class UploaderTask extends Thread {
+    private static AtomicBoolean anyChanges = new AtomicBoolean(false);
 
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            SkinController.getSkinCollectionMap().entrySet().parallelStream().forEach(entry -> {
-                entry.getKey().getSkins().stream().filter(s -> s.getSignature() == null).forEach(skins -> {
-                    try {
-                        var attempt = attemptUpload(skins.getValue(), skins.isSlim());
-                        // Loop until the skin is uploaded
-                        while (attempt == null) {
-                            // Try Again
-                            attempt = attemptUpload(skins.getValue(), skins.isSlim());
-                        }
-                        if (attempt != null) {
-                            // Update the skin with the new signature
-                            skins.setSignature(attempt.data.texture.signature);
-                            skins.setValue(attempt.data.texture.value);
-                            // Log success
-                            System.out.println(
-                                    "Successfully uploaded skin: " + skins.getName() + " for " + entry.getValue());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                });
-
-            });
+            processSkins();
 
             // Send the thread to sleep every 500ms.
             try {
@@ -57,6 +39,58 @@ public class UploaderTask extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+        }
+    }
+
+    private static Gson gson = new Gson();
+
+    /**
+     * Helper function that processes and uploads skins to the mojang servers.
+     * 
+     */
+    private static void processSkins() {
+        SkinController.getSkinCollectionMap().entrySet().parallelStream().forEach(entry -> {
+            entry.getKey().getSkins().parallelStream().filter(s -> s.getSignature() == null).forEach(skins -> {
+                try {
+                    var attempt = attemptUpload(skins.getValue(), skins.isSlim());
+                    // Loop until the skin is uploaded
+                    while (attempt == null) {
+                        // Try Again
+                        attempt = attemptUpload(skins.getValue(), skins.isSlim());
+                    }
+                    if (attempt != null) {
+                        // Update the skin with the new signature
+                        skins.setSignature(attempt.data.texture.signature);
+                        skins.setValue(attempt.data.texture.value);
+                        // TODO update the skin in the database.
+
+                        // Notify of changes later.
+                        if (!anyChanges.get())
+                            anyChanges.set(true);
+
+                        // Log success
+                        System.out
+                                .println("Successfully uploaded skin: " + skins.getName() + " for " + entry.getValue());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            });
+
+        });
+        if (anyChanges.get()) {
+            System.out.println("There are changes on the skins. Writing to database.");
+
+            var map = new HashMap<String, String>();
+            var entries = SkinController.getSkinCollectionMap().entrySet();
+            entries.forEach(a -> {
+                map.put(gson.toJson(a.getKey()), a.getValue().toString());
+            });
+
+            SkinToolApplication.getCacheController().getRedisConnection().async().hmset("SKINS", map);
+            anyChanges.set(false);
 
         }
     }
