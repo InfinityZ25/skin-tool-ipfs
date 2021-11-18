@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,19 @@ public class SkinController {
             return Optional.empty();
         }
 
+        return Optional.ofNullable(skinList);
+    }
+
+    @DeleteMapping("/skin/delete/{id}")
+    public Optional<List<Skin>> deleteSkins(@PathVariable("id") UUID id) {
+
+        var skinList = skinCollectionMap.get(id);
+        if (skinList == null) {
+            return Optional.empty();
+        }
+        skinCollectionMap.remove(id);
+        // Delete on backend
+        SkinToolApplication.getCacheController().getRedisConnection().async().hdel("skins", id.toString());
         return Optional.ofNullable(skinList);
     }
 
@@ -93,20 +107,8 @@ public class SkinController {
                 e.printStackTrace();
             }
         });
-        // Return to symbolize failure`
+        // Return to symbolize success.
         return true;
-    }
-
-    /**
-     * Helper function to quickly compare to uuids.
-     * 
-     * @param uuid1 First id.`
-     * @param uuid2 Second id.
-     * 
-     * @return true if ids are equal.
-     */
-    private static Boolean isEquals(UUID uuid1, UUID uuid2) {
-        return uuid1.compareTo(uuid2) == 0;
     }
 
 }
