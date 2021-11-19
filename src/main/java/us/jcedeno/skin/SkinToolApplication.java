@@ -46,14 +46,12 @@ public class SkinToolApplication {
 		// Get variables from environment
 		final var mineskinClientKey = getEnvOrEmpty("MINESKIN_KEY");
 		final var mineskinAgent = getEnvOrEmpty("MINESKIN_USR_AGENT");
-		final var ipfsAddress = getEnvOrEmpty("IPFS_HOST");
 		final var skinToolPythonUri = getEnvOrEmpty("SKIN_TOOL_PYTHON_URI");
 		final var redisURI = getEnvOrEmpty("REDIS_URI");
 
 		// Print out all variables
 		System.out.println("MINESKIN_KEY: " + mineskinClientKey);
 		System.out.println("MINESKIN_USR_AGENT: " + mineskinAgent);
-		System.out.println("IPFS_HOST: " + ipfsAddress);
 		System.out.println("SKIN_TOOL_PYTHON_URI: " + skinToolPythonUri);
 		System.out.println("REDIS_URI: " + redisURI);
 
