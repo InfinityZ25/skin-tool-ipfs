@@ -4,6 +4,6 @@
 NAME=skin_tool
 # public tcp port for the rest api
 PORT=42069
-
+echo "$REDIS_URI is the uri"
 # run the container
-docker run -it -d --name $NAME -p $PORT:8080 jcedeno/skin-tool-ipfs:latest
+docker run -it -d --name $NAME -e REDIS_URI=$REDIS_URI -p $PORT:8080 jcedeno/skin-tool-ipfs:latest
