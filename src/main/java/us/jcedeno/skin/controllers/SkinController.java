@@ -80,7 +80,7 @@ public class SkinController {
         // Parse the skins into SkinCollection Format.
         if (skinsForPlayer.get("data") != null) {
             var skins = skinsForPlayer.getAsJsonObject("data").entrySet().stream().map(
-                    m -> Skin.create(m.getKey(), m.getValue().getAsString(), skinsForPlayer.get("slim").getAsBoolean()))
+                    m -> Skin.create(m.getValue().getAsString(), m.getKey(), skinsForPlayer.get("slim").getAsBoolean()))
                     .toList();
 
             // Add to the map

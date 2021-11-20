@@ -27,6 +27,8 @@ import us.jcedeno.skin.controllers.SkinController;
  */
 public class UploaderTask extends Thread {
     private static AtomicBoolean anyChanges = new AtomicBoolean(false);
+    private static Gson gson = new Gson();
+
 
     @Override
     public void run() {
@@ -42,8 +44,6 @@ public class UploaderTask extends Thread {
 
         }
     }
-
-    private static Gson gson = new Gson();
 
     /**
      * Helper function that processes and uploads skins to the mojang servers.
@@ -124,5 +124,6 @@ public class UploaderTask extends Thread {
         return skinObject;
 
     }
+    
 
 }

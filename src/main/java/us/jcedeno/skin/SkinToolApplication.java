@@ -101,7 +101,7 @@ public class SkinToolApplication {
 			var response = client.send(request, BodyHandlers.ofString()).body();
 			return gson.fromJson(response, JsonObject.class);
 		} catch (IOException | InterruptedException e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 
 		return new JsonObject();
