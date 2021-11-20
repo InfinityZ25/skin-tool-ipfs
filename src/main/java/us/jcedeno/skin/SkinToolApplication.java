@@ -75,7 +75,6 @@ public class SkinToolApplication {
 				SkinController.getSkinCollectionMap().put(id, skins);
 			});
 		}
-		cacheController = new RedisController(redisURI);
 
 		// Create and start Uploader Task Thread
 		uploaderThread = new UploaderTask();
