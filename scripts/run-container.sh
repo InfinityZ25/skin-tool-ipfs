@@ -6,4 +6,4 @@ NAME=skin_tool
 PORT=42069
 echo "$REDIS_URI is the uri"
 # run the container
-docker run -it -d --name $NAME -e REDIS_URI=$REDIS_URI -p $PORT:8080 jcedeno/skin-tool-ipfs:latest
+docker run -it -d --name $NAME -e REDIS_URI=$REDIS_URI -e SKIN_TOOL_PYTHON_URI=$SKIN_TOOL_PYTHON_URI -p $PORT:8080 jcedeno/skin-tool-ipfs:latest

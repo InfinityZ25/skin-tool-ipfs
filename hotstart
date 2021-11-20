@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Sync any updates
+git pull
+# Stop old container, if present, and delete it.
+docker stop skin_tool && docker rm skin_tool
+echo "Don't forget to export REDIS_URI var to path."
+# Build and run new container on prod
+scripts/build-container.sh  && ./scripts/run-container.sh
